@@ -2,7 +2,7 @@
 import torch
 import torch.optim as optim
 import util
-from model import fan_gwnet_SOFTS
+from model import NSSTAN
 
 class trainer:
 
@@ -10,9 +10,9 @@ class trainer:
         self.model_name = model_name
         self.task = task
         self.in_dim = in_dim
-        self.fan_freq_topk = 1
-        self.fan_rfft = True
-        self.model = fan_gwnet_SOFTS(device, num_nodes, dropout, supports=supports, gcn_bool=gcn_bool, addaptadj=addaptadj, aptinit=aptinit, in_dim=in_dim, seq_length=seq_length, nhid=nhid, fan_freq_topk=self.fan_freq_topk, fan_rfft=self.fan_rfft)
+        self.fadn_freq_topk = 1
+        self.fadn_rfft = True
+        self.model = NSSTAN(device, num_nodes, dropout, supports=supports, gcn_bool=gcn_bool, addaptadj=addaptadj, aptinit=aptinit, in_dim=in_dim, seq_length=seq_length, nhid=nhid, fadn_freq_topk=self.fadn_freq_topk, fadn_rfft=self.fadn_rfft)
         self.model.to(device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lrate, weight_decay=wdecay)
         self.loss = util.masked_mae
