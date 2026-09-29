@@ -75,10 +75,7 @@ The public model entry point is `NSSTAN` in [model.py](model.py):
 from model import NSSTAN
 ```
 
-See [model.py](model.py) for the constructor signature and [engine.py](engine.py) for the training wrapper. Use the dataset's actual road supports and match the input-channel configuration to the prepared data. Internal compatibility identifiers and parameter initialization order remain unchanged.
+See [model.py](model.py) for the constructor signature and [engine.py](engine.py) for the training wrapper. Use the dataset's actual road supports and match the input-channel configuration to the prepared data.
 
-## Additional documents
-
-The [component notice](THIRD_PARTY_NOTICES.md) and [license directory](licenses/) remain part of the full source distribution. This overview describes the model and its usage; it does not establish development history or independent authorship.
 
 Authors: Xin Liu, Yi Xu, Tongyu Zhu, Liangzhe Han, Mingzhe Liu and Leilei Sun.
