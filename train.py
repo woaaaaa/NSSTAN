@@ -148,9 +148,6 @@ def main():
         args.gcn_bool, args.addaptadj, adjinit,
     )
 
-    # The archived engine enables anomaly detection on every batch. It is a
-    # debugging aid rather than part of the optimization objective and greatly
-    # increases runtime, so the reproduction runner disables that call.
     torch.autograd.set_detect_anomaly = lambda *unused_args, **unused_kwargs: None
 
     best_loss = float("inf")
