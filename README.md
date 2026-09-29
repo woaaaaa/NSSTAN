@@ -2,9 +2,23 @@
 
 PyTorch implementation of **Node-aware Spectral Spatio-Temporal Aggregation Network for Traffic Flow Forecasting**.
 
-## Scope
+## Repository contents
 
-This repository contains the NSSTAN model and its necessary training, data-loading and evaluation utilities. It does not distribute baseline implementations, comparison experiments, experimental results, training logs or trained checkpoints.
+The NSSTAN source code is stored directly in this repository as ordinary Python files. Open the files below to inspect the implementation; there is no code archive to extract. The benchmark datasets are distributed separately as a ZIP asset in [Releases](https://github.com/woaaaaa/NSSTAN/releases/tag/benchmark-inputs-v1).
+
+| File | Purpose |
+| --- | --- |
+| [model.py](model.py) | NSSTAN forecasting architecture and constituent modules |
+| [train.py](train.py) | Training, validation-based checkpoint selection and final evaluation |
+| [engine.py](engine.py) | Optimization and metric wrapper |
+| [util.py](util.py) | Data loading, scaling, graph supports and metrics |
+| [prepare_data.py](prepare_data.py) | Explicitly configured input-window and graph preparation |
+| [requirements.txt](requirements.txt) | Python dependencies |
+| [data/README.md](data/README.md) | Dataset access, file layout and preprocessing examples |
+
+The public repository does not include standalone baseline implementations, comparison experiments, experimental results, training logs or trained checkpoints. Training and evaluation utilities generate outputs locally; those outputs are not part of the published files.
+
+## Architecture
 
 The implemented forecasting path is:
 
@@ -74,8 +88,8 @@ model.eval()
 
 `NSSTAN` is an alias of the preserved `fan_gwnet_SOFTS` class. The computational definitions and parameter initialization order are retained. Some constructor members unused by the forecast remain for compatibility with existing state dictionaries and initialization order. They should not be removed when reproducing existing runs without accounting for the resulting change in random-number consumption.
 
-## Attribution
+## Component provenance and licenses
 
-NSSTAN adapts building blocks from Graph WaveNet, FAN and SOFTS. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the upstream licenses in `licenses/`. These are necessary components of NSSTAN, not independently distributed baseline models.
+Component-specific source information is documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), with the corresponding license texts in [licenses/](licenses/). These notices concern the identified components and utilities; they are not a statement that the entire NSSTAN architecture is another model, nor do they indicate that standalone baseline implementations are distributed here.
 
 Authors: Xin Liu, Yi Xu, Tongyu Zhu, Liangzhe Han, Mingzhe Liu and Leilei Sun.
