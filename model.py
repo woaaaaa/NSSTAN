@@ -1,9 +1,3 @@
-"""NSSTAN model. See THIRD_PARTY_NOTICES.md for component attribution.
-
-Only the active forecasting implementation and its dependencies are included.
-Constructor order and compatibility members are retained to preserve parameter
-initialization and checkpoint keys. No comparison models are distributed here.
-"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
