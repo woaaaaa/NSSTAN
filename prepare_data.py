@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-"""Create explicitly configured NSSTAN windows from public raw measurements.
+"""Create explicitly configured NSSTAN windows from public raw measurements."""
 
-This utility does not infer historical experiment configurations. Specify the
-feature order, split convention and graph settings required for your run.
-"""
 from pathlib import Path
 import argparse
 import csv
