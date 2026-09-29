@@ -1,4 +1,4 @@
-"""NSSTAN-only optimizer wrapper; no baseline dispatcher."""
+
 import torch
 import torch.optim as optim
 import util
