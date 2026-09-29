@@ -69,27 +69,16 @@ Each run saves its best-validation-MAE model locally, then computes the test met
 
 ## Model API
 
-```python
-import torch
-from model import NSSTAN
+The public model entry point is `NSSTAN` in [model.py](model.py):
 
-# Replace these demonstration supports with the dataset's actual road supports.
-device = torch.device("cpu")
-nodes = 170
-supports = [torch.eye(nodes), torch.eye(nodes)]
-model = NSSTAN(
-    device=device, num_nodes=nodes, dropout=0.3, supports=supports,
-    gcn_bool=True, addaptadj=True, aptinit=None,
-    in_dim=1, seq_length=12, nhid=32,
-    fan_freq_topk=1, fan_rfft=True,
-).to(device)
-model.eval()
+```python
+from model import NSSTAN
 ```
 
-`NSSTAN` is an alias of the preserved `fan_gwnet_SOFTS` class. The computational definitions and parameter initialization order are retained. Some constructor members unused by the forecast remain for compatibility with existing state dictionaries and initialization order. They should not be removed when reproducing existing runs without accounting for the resulting change in random-number consumption.
+See [model.py](model.py) for the constructor signature and [engine.py](engine.py) for the training wrapper. Use the dataset's actual road supports and match the input-channel configuration to the prepared data. Internal compatibility identifiers and parameter initialization order remain unchanged.
 
-## Component provenance and licenses
+## Additional documents
 
-Component-specific source information is documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), with the corresponding license texts in [licenses/](licenses/). These notices concern the identified components and utilities; they are not a statement that the entire NSSTAN architecture is another model, nor do they indicate that standalone baseline implementations are distributed here.
+The [component notice](THIRD_PARTY_NOTICES.md) and [license directory](licenses/) remain part of the full source distribution. This overview describes the model and its usage; it does not establish development history or independent authorship.
 
 Authors: Xin Liu, Yi Xu, Tongyu Zhu, Liangzhe Han, Mingzhe Liu and Leilei Sun.
