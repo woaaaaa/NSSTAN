@@ -16,8 +16,6 @@ The NSSTAN source code is stored directly in this repository as ordinary Python 
 | [requirements.txt](requirements.txt) | Python dependencies |
 | [data/README.md](data/README.md) | Dataset access, file layout and preprocessing examples |
 
-The public repository does not include standalone baseline implementations, comparison experiments, experimental results, training logs or trained checkpoints. Training and evaluation utilities generate outputs locally; those outputs are not part of the published files.
-
 ## Architecture
 
 The implemented forecasting path is:
@@ -45,10 +43,6 @@ The six benchmark datasets are PEMS03, PEMS04, PEMS07, PEMS08, METR-LA and PEMS-
 
 The training loader accepts a directory containing `train.npz`, `val.npz` and `test.npz`, each with `x` and `y` arrays of shape `[samples, 12, nodes, features]`. It standardizes the selected input target channel using training-set statistics only. Targets remain in their original scale.
 
-**Channel selection must match the preprocessing configuration.** `--task A` selects target channel 0; `--task B` selects target channel 1. `--in-dim` controls the model's number of input features. With a single input channel, the archived loader/engine uses the first channel for task A and the last channel for task B. Do not use task B with a one-feature target array. Window boundaries, raw feature order and graph construction also need to match the intended evaluation protocol.
-
-The raw data archive is not a certification that newly generated windows are byte-identical to every historical evaluation array. Preserve the exact preprocessing and model configuration when reproducing a particular experiment.
-
 ## Training
 
 For already-prepared one-channel traffic-flow windows, an example is:
@@ -65,17 +59,3 @@ python train.py \
 
 This is an invocation example, not a statement that seed 0 or this channel configuration was used for every manuscript experiment. Supply the recorded seed and task configuration for the run to reproduce. `--output-dir` must not already exist. Optional early stopping is controlled by `--patience` and `--min-epochs`; leave patience at 0 for fixed-epoch training.
 
-Each run saves its best-validation-MAE model locally, then computes the test metrics with that checkpoint. Local output files are excluded from this repository. MAPE returned by the utilities is a ratio; multiply by 100 to report a percentage. Evaluation excludes zero targets under the implemented benchmark convention, which also excludes genuine zero traffic-flow values.
-
-## Model API
-
-The public model entry point is `NSSTAN` in [model.py](model.py):
-
-```python
-from model import NSSTAN
-```
-
-See [model.py](model.py) for the constructor signature and [engine.py](engine.py) for the training wrapper. Use the dataset's actual road supports and match the input-channel configuration to the prepared data.
-
-
-Authors: Xin Liu, Yi Xu, Tongyu Zhu, Liangzhe Han, Mingzhe Liu and Leilei Sun.
