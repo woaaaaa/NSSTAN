@@ -57,10 +57,10 @@ class gcn(nn.Module):
         h = F.dropout(h, self.dropout, training=self.training)
         return h
 
-class MLPfreq(nn.Module):
+class FrequencyProjector(nn.Module):
 
     def __init__(self, seq_len, pred_len, enc_in):
-        super(MLPfreq, self).__init__()
+        super(FrequencyProjector, self).__init__()
         self.seq_len = seq_len
         self.pred_len = pred_len
         self.channels = enc_in
@@ -101,7 +101,7 @@ def frequency_decomposition_and_normalization(input, top_k, use_rfft=True):
     normalized_input = input - cyclic_component
     return (normalized_input, cyclic_component)
 
-class FAN(nn.Module):
+class FADN(nn.Module):
 
     def __init__(self, seq_len, pred_len, enc_in, freq_topk=20, rfft=True, **kwargs):
         super().__init__()
@@ -116,7 +116,7 @@ class FAN(nn.Module):
         self.weight = nn.Parameter(torch.ones(2, self.enc_in))
 
     def _build_model(self):
-        self.model_freq = MLPfreq(seq_len=self.seq_len, pred_len=self.pred_len, enc_in=self.enc_in)
+        self.model_freq = FrequencyProjector(seq_len=self.seq_len, pred_len=self.pred_len, enc_in=self.enc_in)
 
     def normalize(self, input):
         (norm_input, x_filtered) = frequency_decomposition_and_normalization(input, self.freq_topk, self.rfft)
@@ -129,10 +129,10 @@ class FAN(nn.Module):
         elif mode == 'd':
             return self.denormalize(batch_x)
 
-class STAR(nn.Module):
+class NAR(nn.Module):
 
     def __init__(self, d_series, d_core):
-        super(STAR, self).__init__()
+        super(NAR, self).__init__()
         self.gen1 = nn.Linear(d_series, d_core)
         self.gen2 = nn.Linear(d_series + d_core, d_series)
 
@@ -155,10 +155,10 @@ class STAR(nn.Module):
         output = combined_mean_cat
         return (output, None)
 
-class gwnet_fan_softs1(nn.Module):
+class NSSTANBackbone(nn.Module):
 
     def __init__(self, device, num_nodes, dropout=0.3, supports=None, gcn_bool=True, addaptadj=True, aptinit=None, in_dim=1, out_dim=12, residual_channels=32, dilation_channels=32, skip_channels=256, end_channels=512, kernel_size=2, blocks=4, layers=2, d_core=256):
-        super(gwnet_fan_softs1, self).__init__()
+        super(NSSTANBackbone, self).__init__()
         self.dropout = dropout
         self.blocks = blocks
         self.layers = layers
@@ -179,9 +179,9 @@ class gwnet_fan_softs1(nn.Module):
         self.gconv = nn.ModuleList()
         self.skip_convs_gcn = nn.ModuleList()
         self.bn_gcn = nn.ModuleList()
-        self.star_modules1 = nn.ModuleList([STAR(d_series=dilation_channels, d_core=d_core) for _ in range(blocks * layers)])
-        self.star_modules2 = nn.ModuleList([STAR(d_series=dilation_channels, d_core=d_core) for _ in range(blocks * layers)])
-        self.star_modules_draw = nn.ModuleList([STAR(d_series=dilation_channels, d_core=d_core) for _ in range(blocks * layers)])
+        self.nar_modules1 = nn.ModuleList([NAR(d_series=dilation_channels, d_core=d_core) for _ in range(blocks * layers)])
+        self.nar_modules2 = nn.ModuleList([NAR(d_series=dilation_channels, d_core=d_core) for _ in range(blocks * layers)])
+        self.nar_modules_aux = nn.ModuleList([NAR(d_series=dilation_channels, d_core=d_core) for _ in range(blocks * layers)])
         self.supports = supports
         self.supports_len = 0 if supports is None else len(supports)
         if gcn_bool and addaptadj:
@@ -238,7 +238,7 @@ class gwnet_fan_softs1(nn.Module):
             x1 = filter1 * gate1
             (b, c, n, t) = x1.shape
             x1 = x1.permute(0, 3, 2, 1).contiguous().view(b * t, n, c)
-            (x1, _) = self.star_modules1[i](x1)
+            (x1, _) = self.nar_modules1[i](x1)
             x1 = x1.view(b, t, n, c).permute(0, 3, 2, 1)
             s1 = self.skip_convs1[i](x1)
             if skip is not 0:
@@ -252,7 +252,7 @@ class gwnet_fan_softs1(nn.Module):
             x2 = filter2 * gate2
             (b, c, n, t) = x2.shape
             x2 = x2.permute(0, 3, 2, 1).contiguous().view(b * t, n, c)
-            (x2, _) = self.star_modules2[i](x2)
+            (x2, _) = self.nar_modules2[i](x2)
             x2 = x2.view(b, t, n, c).permute(0, 3, 2, 1)
             s2 = self.skip_convs2[i](x2)
             skip = skip[:, :, :, -s2.size(3):]
@@ -278,20 +278,18 @@ class gwnet_fan_softs1(nn.Module):
         x = x.squeeze(-1).transpose(1, 2)
         return x
 
-class fan_gwnet_SOFTS(nn.Module):
+class NSSTAN(nn.Module):
 
-    def __init__(self, device, num_nodes, dropout, supports, gcn_bool, addaptadj, aptinit, in_dim, seq_length, nhid, fan_freq_topk, fan_rfft=True):
-        super(fan_gwnet_SOFTS, self).__init__()
+    def __init__(self, device, num_nodes, dropout, supports, gcn_bool, addaptadj, aptinit, in_dim, seq_length, nhid, fadn_freq_topk, fadn_rfft=True):
+        super(NSSTAN, self).__init__()
         self.device = device
         self.supports = supports
-        self.FANmodel = FAN(seq_len=seq_length, pred_len=seq_length, enc_in=in_dim, freq_topk=fan_freq_topk, rfft=fan_rfft).to(device)
-        self.GWNmodel1 = gwnet_fan_softs1(device, num_nodes, dropout, supports=supports, gcn_bool=gcn_bool, addaptadj=addaptadj, aptinit=aptinit, in_dim=in_dim, out_dim=seq_length, residual_channels=nhid, dilation_channels=nhid, skip_channels=nhid * 8, end_channels=nhid * 16).to(device)
+        self.fadn_module = FADN(seq_len=seq_length, pred_len=seq_length, enc_in=in_dim, freq_topk=fadn_freq_topk, rfft=fadn_rfft).to(device)
+        self.backbone = NSSTANBackbone(device, num_nodes, dropout, supports=supports, gcn_bool=gcn_bool, addaptadj=addaptadj, aptinit=aptinit, in_dim=in_dim, out_dim=seq_length, residual_channels=nhid, dilation_channels=nhid, skip_channels=nhid * 8, end_channels=nhid * 16).to(device)
 
     def forward(self, input_data):
-        """2、GWN外面FAN"""
-        (norm_input, x_filtered) = self.FANmodel.normalize(input_data)
-        processed = self.GWNmodel1(norm_input, x_filtered)
+        """NSSTAN forecasting path."""
+        (norm_input, x_filtered) = self.fadn_module.normalize(input_data)
+        processed = self.backbone(norm_input, x_filtered)
         return processed
 
-# Public name; aliasing preserves constructor and state-dict compatibility.
-NSSTAN = fan_gwnet_SOFTS
