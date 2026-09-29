@@ -28,7 +28,7 @@ def parse_args():
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--data", required=True)
     parser.add_argument("--adjdata", required=True)
-    parser.add_argument("--model", default="NSSTAN", choices=["NSSTAN", "fan_gwnet_SOFTS"])
+    parser.add_argument("--model", default="NSSTAN", choices=["NSSTAN"])
     parser.add_argument("--task", choices=["A", "B"], required=True)
     parser.add_argument("--adjtype", default="doubletransition")
     parser.add_argument("--num-nodes", type=int, required=True)
