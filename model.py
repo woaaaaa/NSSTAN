@@ -114,7 +114,6 @@ class FADN(nn.Module):
 
     def normalize(self, input):
         (norm_input, x_filtered) = frequency_decomposition_and_normalization(input, self.freq_topk, self.rfft)
-        '残差部分用MLP处理'
         return (norm_input, x_filtered)
 
     def forward(self, batch_x, mode='n'):
@@ -235,7 +234,7 @@ class NSSTANBackbone(nn.Module):
             (x1, _) = self.nar_modules1[i](x1)
             x1 = x1.view(b, t, n, c).permute(0, 3, 2, 1)
             s1 = self.skip_convs1[i](x1)
-            if skip is not 0:
+            if not isinstance(skip, int):
                 skip = skip[:, :, :, -s1.size(3):]
             skip = skip + s1
             feature1 = self.residual_convs1[i](x1) + residual1[:, :, :, -x1.size(3):]
