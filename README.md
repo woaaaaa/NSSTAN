@@ -1,6 +1,6 @@
 # NSSTAN
 
-PyTorch implementation of **NSSTAN** (Share the Common, Keep the Individual: Node-aware Spectral Aggregation for Short-term Traffic Forecasting).
+PyTorch implementation of **NSSTAN**.
 
 ## Repository contents
 
